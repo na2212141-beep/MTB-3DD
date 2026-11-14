@@ -3,12 +3,27 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; touch-action: none; }
-        #controls { position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 100; pointer-events: none; }
-        .btn-group { display: flex; gap: 10px; pointer-events: auto; }
-        .btn { width: 70px; height: 70px; background: rgba(255,255,255,0.4); border: 2px solid #fff; border-radius: 50%; color: #fff; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; user-select: none; }
-        .btn:active { background: rgba(255,255,255,0.9); color: #000; }
-        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; font-family: sans-serif; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 10px; z-index: 1000; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #111; touch-action: none; font-family: sans-serif; }
+        
+        /* Поворот экрана */
+        #game-wrapper { position: absolute; top: 0; left: 0; transform-origin: top left; width: 100%; height: 100%; display: flex; flex-direction: column; }
+        
+        /* Меню */
+        #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 20, 30, 0.95); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; }
+        #menu h1 { font-size: 40px; color: #fc0; margin-bottom: 20px; text-shadow: 2px 2px 4px #000; }
+        .bike-select { display: flex; gap: 20px; margin-bottom: 30px; }
+        .bike-btn { padding: 15px 30px; background: #333; border: 2px solid #555; border-radius: 10px; color: white; font-size: 18px; cursor: pointer; transition: 0.2s; }
+        .bike-btn.active { background: #2a7; border-color: #0f0; box-shadow: 0 0 15px #0f0; }
+        #play-btn { padding: 20px 60px; background: #e33; border: none; border-radius: 10px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; opacity: 0.5; pointer-events: none; }
+        #play-btn.ready { opacity: 1; pointer-events: auto; box-shadow: 0 0 20px #e33; }
+        #loading-text { margin-top: 20px; font-size: 16px; color: #aaa; }
+
+        /* Управление */
+        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 100; pointer-events: none; }
+        .btn-group { display: flex; gap: 15px; pointer-events: auto; }
+        .btn { width: 70px; height: 70px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; color: white; font-size: 30px; display: flex; justify-content: center; align-items: center; user-select: none; backdrop-filter: blur(5px); }
+        .btn:active { background: rgba(255,255,255,0.8); color: #000; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -16,129 +31,176 @@
 </head>
 <body>
 
-<div id="loading">Загрузка трассы... Подожди...</div>
-
-<div id="controls">
-    <div class="btn-group">
-        <div class="btn" id="btnLeft">←</div>
-        <div class="btn" id="btnRight">→</div>
+<div id="game-wrapper">
+    <div id="menu">
+        <h1>MTB 3D FREERIDE</h1>
+        <div class="bike-select">
+            <div class="bike-btn active" id="sel-enduro">Enduro DH</div>
+            <div class="bike-btn" id="sel-mongoose">Mongoose Tyax</div>
+        </div>
+        <button id="play-btn">ЗАГРУЗКА...</button>
+        <div id="loading-text">Скачиваем модели...</div>
     </div>
-    <div class="btn-group">
-        <div class="btn" id="btnBrake">🛑</div>
-        <div class="btn" id="btnGas">🔥</div>
+
+    <div id="controls">
+        <div class="btn-group">
+            <div class="btn" id="btnLeft">←</div>
+            <div class="btn" id="btnRight">→</div>
+        </div>
+        <div class="btn-group">
+            <div class="btn" id="btnBrake">🛑</div>
+            <div class="btn" id="btnGas">🔥</div>
+        </div>
     </div>
 </div>
 
 <script>
-    // ===== 1. СЦЕНА =====
+    // ===== 1. АДАПТАЦИЯ ЭКРАНА (ПОВОРОТ НА 90) =====
+    const wrapper = document.getElementById('game-wrapper');
+    function resizeScreen() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (h > w) {
+            // Телефон вертикально - поворачиваем
+            wrapper.style.width = h + 'px';
+            wrapper.style.height = w + 'px';
+            wrapper.style.transform = `rotate(90deg) translateY(-100%)`;
+        } else {
+            // Горизонтально
+            wrapper.style.width = w + 'px';
+            wrapper.style.height = h + 'px';
+            wrapper.style.transform = 'none';
+        }
+        
+        if (camera) {
+            camera.aspect = (h > w ? w : w) / (h > w ? h : h);
+            camera.updateProjectionMatrix();
+            renderer.setSize(h > w ? h : w, h > w ? w : h);
+        }
+    }
+
+    // ===== 2. НАСТРОЙКИ 3D =====
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB);
-    scene.fog = new THREE.Fog(0x87CEEB, 30, 200);
+    scene.fog = new THREE.Fog(0x87CEEB, 50, 300);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    document.body.appendChild(renderer.domElement);
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    wrapper.appendChild(renderer.domElement);
+    window.addEventListener('resize', resizeScreen);
+    resizeScreen();
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(20, 50, 20);
+    // Свет
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(50, 100, 50);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.left = -100;
+    dirLight.shadow.camera.right = 100;
+    dirLight.shadow.camera.top = 100;
+    dirLight.shadow.camera.bottom = -100;
     scene.add(dirLight);
 
-    // ===== 2. ФИЗИЧЕСКИЙ МИР =====
+    // ===== 3. ФИЗИКА =====
     const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0) });
-    
     const groundMaterial = new CANNON.Material("ground");
     const wheelMaterial = new CANNON.Material("wheel");
-    const contactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, { friction: 0.3, restitution: 0 });
-    world.addContactMaterial(contactMaterial);
+    world.addContactMaterial(new CANNON.ContactMaterial(wheelMaterial, groundMaterial, { friction: 0.5, restitution: 0 }));
 
-    // Невидимая плоскость на всякий случай (чтобы велик не улетел в бездну, если упадет с трассы)
+    // Страховочная плоскость (если упадешь с трассы)
     const floorBody = new CANNON.Body({ mass: 0, material: groundMaterial });
     floorBody.addShape(new CANNON.Plane());
     floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-    floorBody.position.set(0, -10, 0); // Опускаем ее ниже трассы
+    floorBody.position.set(0, -20, 0);
     world.addBody(floorBody);
 
-    // ===== 3. ЗАГРУЗКА ТРАССЫ И ВЕЛИКОВ =====
-    const loader = new THREE.GLTFLoader();
-    let bikeMesh = null;
+    // ===== 4. ЗАГРУЗКА МОДЕЛЕЙ =====
+    const manager = new THREE.LoadingManager();
+    const loader = new THREE.GLTFLoader(manager);
     
-    // 3.1 Загрузка Трассы (и создание для нее физики)
+    let trackLoaded = false, bikesLoaded = 0;
+    let bikeModels = { enduro: null, mongoose: null };
+    let activeBikeName = 'enduro';
+
+    const btnPlay = document.getElementById('play-btn');
+    const loadingText = document.getElementById('loading-text');
+
+    manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+        loadingText.innerText = `Загрузка: ${itemsLoaded} из ${itemsTotal}...`;
+    };
+
+    manager.onLoad = function () {
+        loadingText.innerText = "Всё готово!";
+        btnPlay.innerText = "ПОЕХАЛИ!";
+        btnPlay.classList.add('ready');
+    };
+
+    // 4.1. Трасса
     loader.load('mtb-skillcenter_celerina.glb', function (gltf) {
-        const trackModel = gltf.scene;
-        trackModel.traverse((node) => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; } });
-        scene.add(trackModel);
+        const track = gltf.scene;
+        track.traverse(n => { if(n.isMesh) { n.castShadow = true; n.receiveShadow = true; } });
+        scene.add(track);
         
-        console.log("✅ Трасса загружена! Создаем физику...");
-        
-        // Превращаем визуальную трассу в физический объект (Trimesh)
-        let vertices = [];
-        let indices = [];
-        
-        trackModel.traverse((child) => {
-            if (child.isMesh) {
-                const geometry = child.geometry;
-                const position = geometry.attributes.position;
-                const index = geometry.index;
-                
-                // Применяем мировые координаты
+        // Создаем физику трассы (Trimesh)
+        let vertices = [], indices = [];
+        track.traverse((child) => {
+            if (child.isMesh && child.geometry.attributes.position) {
+                const pos = child.geometry.attributes.position;
+                const idx = child.geometry.index;
                 child.updateMatrixWorld();
-                const matrix = child.matrixWorld;
+                const mat = child.matrixWorld;
                 
-                if (index) {
-                    for (let i = 0; i < position.count; i++) {
-                        const v = new THREE.Vector3().fromBufferAttribute(position, i);
-                        v.applyMatrix4(matrix);
+                if (idx) {
+                    for (let i=0; i<pos.count; i++) {
+                        const v = new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(mat);
                         vertices.push(v.x, v.y, v.z);
                     }
-                    for (let i = 0; i < index.count; i++) {
-                        indices.push(index.getX(i));
-                    }
+                    for (let i=0; i<idx.count; i++) indices.push(idx.getX(i));
                 }
             }
         });
-        
-        const trackShape = new CANNON.Trimesh(vertices, indices);
-        const trackBody = new CANNON.Body({ mass: 0, material: groundMaterial });
-        trackBody.addShape(trackShape);
-        world.addBody(trackBody);
-        
-        document.getElementById('loading').style.display = 'none';
-        console.log("✅ Физика трассы готова!");
-        
-    }, undefined, (error) => {
-        console.error("❌ Ошибка загрузки трассы:", error);
-        document.getElementById('loading').innerText = "Ошибка загрузки трассы";
+        if (vertices.length > 0) {
+            const trackShape = new CANNON.Trimesh(vertices, indices);
+            const trackBody = new CANNON.Body({ mass: 0, material: groundMaterial });
+            trackBody.addShape(trackShape);
+            world.addBody(trackBody);
+        }
     });
 
-    // 3.2 Загрузка Второго велика (Просто стоит для красоты)
+    // 4.2. Велики
+    loader.load('enduro_bicycle_dh.glb', function (gltf) {
+        bikeModels.enduro = gltf.scene;
+        bikeModels.enduro.traverse(n => { if(n.isMesh) n.castShadow = true; });
+        // Масштабирование (если нужно): bikeModels.enduro.scale.set(1,1,1);
+    });
+    
     loader.load('mtb_mongoose_tyax.glb', function (gltf) {
-        const mongoose = gltf.scene;
-        mongoose.traverse((node) => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; } });
-        
-        // Ставим его чуть в стороне. Возможно, придется поднять/опустить (второе число)
-        mongoose.position.set(3, 5, 0); 
-        // Если он огромный или маленький, раскомментируй строчку ниже:
-        // mongoose.scale.set(0.5, 0.5, 0.5);
-        
-        scene.add(mongoose);
-        console.log("✅ Второй велик (Mongoose) загружен!");
+        bikeModels.mongoose = gltf.scene;
+        bikeModels.mongoose.traverse(n => { if(n.isMesh) n.castShadow = true; });
     });
 
-    // ===== 4. ФИЗИКА ИГРОКА (Enduro) =====
+    // Меню выбора
+    document.getElementById('sel-enduro').onclick = () => {
+        document.getElementById('sel-enduro').classList.add('active');
+        document.getElementById('sel-mongoose').classList.remove('active');
+        activeBikeName = 'enduro';
+    };
+    document.getElementById('sel-mongoose').onclick = () => {
+        document.getElementById('sel-mongoose').classList.add('active');
+        document.getElementById('sel-enduro').classList.remove('active');
+        activeBikeName = 'mongoose';
+    };
+
+    // ===== 5. ФИЗИКА ВЕЛОСИПЕДА (Cannon RaycastVehicle) =====
     const chassisShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 1));
     const chassisBody = new CANNON.Body({ mass: 80, material: wheelMaterial });
     chassisBody.addShape(chassisShape);
-    
-    // Ставим велик высоко над трассой, чтобы он упал на нее
-    chassisBody.position.set(0, 15, 0); 
-    chassisBody.angularDamping = 0.9;
+    chassisBody.position.set(0, 10, 0); // Падает сверху
+    chassisBody.angularDamping = 0.9; // Чтобы не крутился как юла
 
     const vehicle = new CANNON.RaycastVehicle({
         chassisBody: chassisBody,
@@ -146,95 +208,107 @@
     });
 
     const wheelOptions = {
-        radius: 0.4,
-        directionLocal: new CANNON.Vec3(0, -1, 0),
-        suspensionStiffness: 30,
-        suspensionRestLength: 0.3,
-        frictionSlip: 1.4,
-        dampingRelaxation: 2.3,
-        dampingCompression: 4.4,
-        maxSuspensionForce: 100000,
-        rollInfluence: 0.01,
+        radius: 0.4, directionLocal: new CANNON.Vec3(0, -1, 0),
+        suspensionStiffness: 30, suspensionRestLength: 0.3, frictionSlip: 1.4,
+        dampingRelaxation: 2.3, dampingCompression: 4.4, maxSuspensionForce: 100000,
+        rollInfluence: 0.05, // Влияет на наклон в поворотах
         axleLocal: new CANNON.Vec3(-1, 0, 0),
         chassisConnectionPointLocal: new CANNON.Vec3(1, 1, 0),
         maxSuspensionTravel: 0.3,
-        customSlidingRotationalSpeed: -30,
-        useCustomSlidingRotationalSpeed: true,
     };
 
-    wheelOptions.chassisConnectionPointLocal.set(0, 0, 1);
+    // Переднее колесо
+    wheelOptions.chassisConnectionPointLocal.set(0, 0, 1.2);
     vehicle.addWheel(wheelOptions);
-    wheelOptions.chassisConnectionPointLocal.set(0, 0, -1);
+    // Заднее колесо
+    wheelOptions.chassisConnectionPointLocal.set(0, 0, -1.2);
     vehicle.addWheel(wheelOptions);
     vehicle.addToWorld(world);
 
-    // Загрузка визуальной модели Enduro
-    loader.load('enduro_bicycle_dh.glb', function (gltf) {
-        bikeMesh = gltf.scene;
-        bikeMesh.traverse((node) => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; } });
-        
-        // ВАЖНО: Настройка масштаба и поворота для Enduro
-        bikeMesh.scale.set(1, 1, 1); // Если велик огромный, поставь 0.1
-        bikeMesh.rotation.y = Math.PI; // Если смотрит вбок, поменяй на 0 или Math.PI/2
+    // ===== 6. ЛОГИКА ИГРЫ =====
+    let isPlaying = false;
+    let activeBikeMesh = null;
 
-        scene.add(bikeMesh);
+    btnPlay.onclick = () => {
+        document.getElementById('menu').style.display = 'none';
+        isPlaying = true;
+        
+        // Добавляем выбранный велик на сцену
+        activeBikeMesh = bikeModels[activeBikeName];
+        if(activeBikeMesh) scene.add(activeBikeMesh);
+    };
+
+    // Управление
+    const keys = { gas: false, brake: false, left: false, right: false };
+    
+    function bindBtn(id, key) {
+        const el = document.getElementById(id);
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+        el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
+        el.addEventListener('mousedown', () => keys[key] = true);
+        el.addEventListener('mouseup', () => keys[key] = false);
+    }
+    bindBtn('btnGas', 'gas');
+    bindBtn('btnBrake', 'brake');
+    bindBtn('btnLeft', 'left');
+    bindBtn('btnRight', 'right');
+
+    // Клавиатура
+    window.addEventListener('keydown', e => {
+        if(e.code === 'ArrowUp' || e.code === 'KeyW') keys.gas = true;
+        if(e.code === 'ArrowDown' || e.code === 'KeyS') keys.brake = true;
+        if(e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+        if(e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+    });
+    window.addEventListener('keyup', e => {
+        if(e.code === 'ArrowUp' || e.code === 'KeyW') keys.gas = false;
+        if(e.code === 'ArrowDown' || e.code === 'KeyS') keys.brake = false;
+        if(e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+        if(e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
     });
 
-    // ===== 5. УПРАВЛЕНИЕ =====
-    const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
-    window.addEventListener('keydown', (e) => { if (e.code in keys) keys[e.code] = true; });
-    window.addEventListener('keyup', (e) => { if (e.code in keys) keys[e.code] = false; });
-
-    const btnGas = document.getElementById('btnGas');
-    const btnBrake = document.getElementById('btnBrake');
-    const btnLeft = document.getElementById('btnLeft');
-    const btnRight = document.getElementById('btnRight');
-
-    btnGas.addEventListener('touchstart', () => keys.ArrowUp = true);
-    btnGas.addEventListener('touchend', () => keys.ArrowUp = false);
-    btnBrake.addEventListener('touchstart', () => keys.ArrowDown = true);
-    btnBrake.addEventListener('touchend', () => keys.ArrowDown = false);
-    btnLeft.addEventListener('touchstart', () => keys.ArrowLeft = true);
-    btnLeft.addEventListener('touchend', () => keys.ArrowLeft = false);
-    btnRight.addEventListener('touchstart', () => keys.ArrowRight = true);
-    btnRight.addEventListener('touchend', () => keys.ArrowRight = false);
-
-    // ===== 6. АНИМАЦИЯ =====
+    // ===== 7. ИГРОВОЙ ЦИКЛ =====
     const clock = new THREE.Clock();
 
     function animate() {
         requestAnimationFrame(animate);
         const dt = Math.min(clock.getDelta(), 0.1);
-        
-        world.step(1 / 60, dt, 3);
 
-        const maxForce = 800; // Увеличил силу, чтобы легче было забираться в горку
-        vehicle.applyEngineForce(keys.ArrowUp ? -maxForce : 0, 1);
-        vehicle.applyEngineForce(keys.ArrowUp ? -maxForce : 0, 0);
-        vehicle.setBrake(keys.ArrowDown ? 200 : 0, 0);
-        vehicle.setBrake(keys.ArrowDown ? 200 : 0, 1);
-        vehicle.setSteeringValue(keys.ArrowLeft ? 0.5 : keys.ArrowRight ? -0.5 : 0, 0);
+        if (isPlaying) {
+            world.step(1 / 60, dt, 3);
 
-        if (bikeMesh) {
-            bikeMesh.position.copy(chassisBody.position);
-            bikeMesh.quaternion.copy(chassisBody.quaternion);
-            
-            // Камера
-            const cameraOffset = new THREE.Vector3(0, 3, -8); 
-            cameraOffset.applyQuaternion(chassisBody.quaternion);
-            camera.position.copy(chassisBody.position).add(cameraOffset);
-            camera.lookAt(chassisBody.position);
+            const force = 800;
+            vehicle.applyEngineForce(keys.gas ? -force : 0, 1);
+            vehicle.applyEngineForce(keys.gas ? -force : 0, 0);
+            vehicle.setBrake(keys.brake ? 200 : 0, 0);
+            vehicle.setBrake(keys.brake ? 200 : 0, 1);
+            vehicle.setSteeringValue(keys.left ? 0.5 : keys.right ? -0.5 : 0, 0);
+
+            // Синхронизация 3D модели с физикой
+            if (activeBikeMesh) {
+                activeBikeMesh.position.copy(chassisBody.position);
+                activeBikeMesh.quaternion.copy(chassisBody.quaternion);
+                
+                // ВАЖНО: Если велик в игре лежит на боку или смотрит не туда,
+                // нужно добавить смещение. Например:
+                // activeBikeMesh.rotation.y = Math.PI; // Развернуть
+                // activeBikeMesh.position.y -= 1; // Опустить
+
+                // Камера
+                const camOffset = new THREE.Vector3(0, 3, -8);
+                camOffset.applyQuaternion(chassisBody.quaternion);
+                camera.position.lerp(chassisBody.position.clone().add(camOffset), 0.1);
+                
+                const lookAtPos = chassisBody.position.clone();
+                lookAtPos.y += 1;
+                camera.lookAt(lookAtPos);
+            }
         }
 
         renderer.render(scene, camera);
     }
-    animate();
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    animate();
 </script>
 </body>
 </html>
