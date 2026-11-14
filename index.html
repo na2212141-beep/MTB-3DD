@@ -9,46 +9,45 @@
         #game-wrapper { position: absolute; top: 0; left: 0; transform-origin: top left; width: 100%; height: 100%; }
         
         #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a2a3a, #0a0a15); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; }
-        #menu h1 { font-size: 50px; color: #fc0; margin-bottom: 5px; text-shadow: 0 4px 10px rgba(252, 200, 0, 0.5); font-style: italic; letter-spacing: 2px; }
+        #menu h1 { font-size: 45px; color: #fc0; margin-bottom: 5px; text-shadow: 0 4px 10px rgba(252, 200, 0, 0.5); font-style: italic; letter-spacing: 2px; }
         #menu p { color: #8cf; margin-bottom: 30px; font-size: 18px; letter-spacing: 1px; }
         
-        .selector-group { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .sel-btn { padding: 12px 25px; background: #333; border: 2px solid #555; border-radius: 10px; color: #ccc; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
+        .selector-group { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .sel-btn { padding: 10px 20px; background: #333; border: 2px solid #555; border-radius: 10px; color: #ccc; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
         .sel-btn.active { background: #2a7; border-color: #0f0; color: #fff; box-shadow: 0 0 15px rgba(0, 255, 0, 0.6); transform: scale(1.05); }
         
-        #play-btn { padding: 20px 70px; background: linear-gradient(to right, #2a7, #1d5); border: none; border-radius: 50px; color: white; font-size: 28px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 20px rgba(42, 167, 100, 0.4); margin-top: 20px; transition: 0.2s; }
+        #play-btn { padding: 20px 60px; background: linear-gradient(to right, #2a7, #1d5); border: none; border-radius: 50px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 20px rgba(42, 167, 100, 0.4); margin-top: 20px; transition: 0.2s; }
         #play-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
         
         #hud { position: absolute; top: 20px; left: 20px; color: white; z-index: 50; text-shadow: 2px 2px 4px #000; display: none; }
-        #hud h2 { font-size: 24px; color: #fc0; }
-        #hud p { font-size: 18px; margin: 5px 0; }
-        #trick-text { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 40px; font-weight: bold; color: #e0e; text-shadow: 0 0 10px #e0e; z-index: 60; display: none; text-align: center; font-style: italic; }
+        #hud h2 { font-size: 22px; color: #fc0; }
+        #hud p { font-size: 16px; margin: 5px 0; }
+        #trick-text { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 35px; font-weight: bold; color: #e0e; text-shadow: 0 0 10px #e0e; z-index: 60; display: none; text-align: center; font-style: italic; }
         
-        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 100; pointer-events: none; }
-        .btn-group { display: flex; gap: 15px; pointer-events: auto; align-items: flex-end; }
+        #controls { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 100; pointer-events: none; }
+        .btn-group { display: flex; gap: 10px; pointer-events: auto; align-items: flex-end; }
         
-        .btn { width: 75px; height: 75px; border-radius: 50%; display: flex; justify-content: center; align-items: center; user-select: none; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.1s; }
+        .btn { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; user-select: none; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.1s; }
         .btn:active { transform: scale(0.85); }
         
-        .btn-arrow { background: rgba(50, 100, 200, 0.6); border: 3px solid #8cf; color: #fff; font-size: 35px; }
+        .btn-arrow { background: rgba(50, 100, 200, 0.6); border: 3px solid #8cf; color: #fff; font-size: 32px; }
         .btn-gas { background: rgba(40, 167, 69, 0.8); border: 3px solid #4f4; }
         .btn-brake { background: rgba(220, 53, 69, 0.8); border: 3px solid #f44; }
-        .btn-wheelie { background: rgba(255, 165, 0, 0.8); border: 3px solid #ff8c00; font-size: 14px; font-weight: bold; }
-        .btn-trick { background: rgba(160, 32, 240, 0.8); border: 3px solid #e0e; font-size: 14px; font-weight: bold; }
+        .btn-wheelie { background: rgba(255, 165, 0, 0.8); border: 3px solid #ff8c00; font-size: 12px; font-weight: bold; }
+        .btn-trick { background: rgba(160, 32, 240, 0.8); border: 3px solid #e0e; font-size: 12px; font-weight: bold; }
         
-        .btn svg { width: 45px; height: 45px; fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-        #cam-toggle { position: absolute; top: 20px; right: 20px; z-index: 100; padding: 10px 20px; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn svg { width: 40px; height: 40px; fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        #cam-toggle { position: absolute; top: 15px; right: 15px; z-index: 100; padding: 8px 15px; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;}
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
 </head>
 <body>
 
 <div id="game-wrapper">
     <div id="menu">
         <h1>MTB FREERIDE 3D</h1>
-        <p>Выбери трассу и велик</p>
+        <p>Визуальная подвеска включена!</p>
         
         <div class="selector-group" id="track-select">
             <div class="sel-btn active" data-track="forest">Лес</div>
@@ -113,136 +112,75 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
-    
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.BasicShadowMap;
+    const renderer = new THREE.WebGLRenderer({ antialias: false });
     wrapper.appendChild(renderer.domElement);
     window.addEventListener('resize', resizeScreen);
     resizeScreen();
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
     dirLight.position.set(50, 100, 50);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
     scene.add(dirLight);
 
-    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0) });
-    const groundMaterial = new CANNON.Material("ground");
-    const wheelMaterial = new CANNON.Material("wheel");
-    world.addContactMaterial(new CANNON.ContactMaterial(wheelMaterial, groundMaterial, { friction: 0.5, restitution: 0 }));
+    // ===== МАТЕМАТИЧЕСКАЯ ФИЗИКА =====
+    const gameState = {
+        z: 0, x: 0, y: 0, speed: 0, maxSpeed: 35, velY: 0,
+        rotX: 0, rotY: 0, rotZ: 0, isJumping: false,
+        trick: "", trickTimer: 0, score: 0,
+        suspension: 0, // Параметр для визуальной подвески
+        suspensionVel: 0
+    };
 
     let currentTrack = 'forest';
     const trackColors = {
-        forest: { ground: 0x2e8b57, sky: 0x87CEEB, fog: 0x87CEEB },
-        desert: { ground: 0xd2b48c, sky: 0xffd700, fog: 0xffd700 },
-        snow:   { ground: 0xeeeeee, sky: 0xaaaaaa, fog: 0xaaaaaa }
+        forest: { ground: 0x2e8b57, sky: 0x87CEEB },
+        desert: { ground: 0xd2b48c, sky: 0xffd700 },
+        snow:   { ground: 0xeeeeee, sky: 0xaaaaaa }
     };
 
-    let groundMesh, heightfieldBody;
+    let groundMesh;
+    const planeSize = 2000;
+    const groundGeo = new THREE.PlaneGeometry(planeSize, planeSize, 100, 100);
+    
+    function getGroundHeight(z) {
+        return Math.sin(z * 0.05) * 3 + Math.cos(z * 0.02) * 5;
+    }
 
     function generateTrack(type) {
         if (groundMesh) scene.remove(groundMesh);
-        if (heightfieldBody) world.removeBody(heightfieldBody);
-
         const colors = trackColors[type];
         scene.background = new THREE.Color(colors.sky);
-        scene.fog = new THREE.Fog(colors.fog, 50, 300);
+        scene.fog = new THREE.Fog(colors.sky, 50, 300);
 
-        const groundGeo = new THREE.PlaneGeometry(200, 600, 50, 100);
         const vertices = groundGeo.attributes.position.array;
-        const matrix = [];
-        
-        for (let i = 0; i < 100; i++) {
-            matrix.push([]);
-            for (let j = 0; j < 50; j++) {
-                const x = (i / 100) * 200 - 100;
-                const z = (j / 50) * 600 - 300;
-                let height = 0;
-                if (type === 'forest') height = Math.sin(x * 0.1) * 2 + Math.cos(z * 0.05) * 3;
-                if (type === 'desert') height = Math.sin(x * 0.05) * 4 + Math.cos(z * 0.02) * 5;
-                if (type === 'snow') height = Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.1) * 2;
-                matrix[i].push(height);
-            }
-        }
-
         for (let i = 0; i < vertices.length; i += 3) {
-            const x = vertices[i];
             const z = vertices[i + 1];
-            let height = 0;
-            if (type === 'forest') height = Math.sin(x * 0.1) * 2 + Math.cos(z * 0.05) * 3;
-            if (type === 'desert') height = Math.sin(x * 0.05) * 4 + Math.cos(z * 0.02) * 5;
-            if (type === 'snow') height = Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.1) * 2;
-            vertices[i + 2] = height;
+            vertices[i + 2] = Math.sin(z * 0.05) * 3 + Math.cos(z * 0.02) * 5;
         }
         groundGeo.computeVertexNormals();
 
         const groundMat = new THREE.MeshStandardMaterial({ color: colors.ground, flatShading: true });
         groundMesh = new THREE.Mesh(groundGeo, groundMat);
         groundMesh.rotation.x = -Math.PI / 2;
-        groundMesh.receiveShadow = true;
         scene.add(groundMesh);
-
-        const heightfieldShape = new CANNON.Heightfield(matrix, { elementSize: 200 / 100 });
-        heightfieldBody = new CANNON.Body({ mass: 0, material: groundMaterial });
-        heightfieldBody.addShape(heightfieldShape);
-        heightfieldBody.position.set(-100, 0, -300);
-        heightfieldBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-        world.addBody(heightfieldBody);
     }
-
-    const chassisShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 1));
-    const chassisBody = new CANNON.Body({ mass: 80, material: wheelMaterial });
-    chassisBody.addShape(chassisShape);
-    chassisBody.position.set(0, 5, 0); 
-    chassisBody.angularDamping = 0.9;
-
-    const vehicle = new CANNON.RaycastVehicle({
-        chassisBody: chassisBody,
-        indexRightAxis: 0, indexUpAxis: 1, indexForwardAxis: 2
-    });
-
-    const wheelOptions = {
-        radius: 0.4, directionLocal: new CANNON.Vec3(0, -1, 0),
-        suspensionStiffness: 30, suspensionRestLength: 0.3, frictionSlip: 1.4,
-        dampingRelaxation: 2.3, dampingCompression: 4.4, maxSuspensionForce: 100000,
-        rollInfluence: 0.05, axleLocal: new CANNON.Vec3(-1, 0, 0),
-        chassisConnectionPointLocal: new CANNON.Vec3(1, 1, 0), maxSuspensionTravel: 0.3,
-    };
-    wheelOptions.chassisConnectionPointLocal.set(0, 0, 1.2); vehicle.addWheel(wheelOptions);
-    wheelOptions.chassisConnectionPointLocal.set(0, 0, -1.2); vehicle.addWheel(wheelOptions);
-    vehicle.addToWorld(world);
 
     let activeBike = null;
     let isPlaying = false;
     let isFPV = true;
-    let score = 0;
-    let currentTrick = "";
-    
     const loader = new THREE.GLTFLoader();
     let bikesLoaded = { enduro: null, mongoose: null };
     let selectedBike = 'enduro';
 
-    // Загрузка Enduro
     loader.load('https://na2212141-beep.github.io/MTB-3DD/enduro_bicycle_dh.glb', (gltf) => {
         bikesLoaded.enduro = gltf.scene;
-        bikesLoaded.enduro.traverse(n => { if(n.isMesh) n.castShadow = true; });
-        
-        // УВЕЛИЧИВАЕМ МАСШТАБ (как на тестовом скрине было норм, ставим 1.5)
         bikesLoaded.enduro.scale.set(1.5, 1.5, 1.5); 
         
         document.getElementById('play-btn').disabled = false;
         document.getElementById('play-btn').innerText = "ПОЕХАЛИ!";
         
-        // Загрузка второго велика в фоне
         loader.load('https://na2212141-beep.github.io/MTB-3DD/mtb_mongoose_tyax.glb', (gltf2) => {
             bikesLoaded.mongoose = gltf2.scene;
-            bikesLoaded.mongoose.traverse(n => { if(n.isMesh) n.castShadow = true; });
             bikesLoaded.mongoose.scale.set(1.5, 1.5, 1.5);
         });
     });
@@ -250,7 +188,6 @@
     function setupMenu(containerId, callback) {
         const container = document.getElementById(containerId);
         const buttons = container.querySelectorAll('.sel-btn');
-        
         buttons.forEach(btn => {
             btn.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
@@ -274,9 +211,8 @@
         activeBike.visible = !isFPV;
         scene.add(activeBike);
         
-        chassisBody.position.set(0, 5, 0);
-        chassisBody.velocity.set(0,0,0);
-        chassisBody.angularVelocity.set(0,0,0);
+        gameState.z = 0; gameState.x = 0; gameState.y = getGroundHeight(0);
+        gameState.speed = 0; gameState.velY = 0; gameState.suspension = 0;
         
         isPlaying = true;
     };
@@ -297,26 +233,22 @@
     }
     bindBtn('btnGas', 'gas'); bindBtn('btnBrake', 'brake'); bindBtn('btnLeft', 'left'); bindBtn('btnRight', 'right'); bindBtn('btnWheelie', 'wheelie');
 
-    let isInAir = false;
-    let trickCooldown = 0;
-    
     document.getElementById('btnTrick').addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if (isInAir && trickCooldown <= 0) {
-            const tricks = ["BACKFLIP", "FRONTFLIP", "360 SPIN", "SUPERMAN"];
-            currentTrick = tricks[Math.floor(Math.random() * tricks.length)];
+        if (gameState.isJumping && gameState.trickTimer <= 0) {
+            const tricks = ["BACKFLIP", "FRONTFLIP", "360 SPIN"];
+            gameState.trick = tricks[Math.floor(Math.random() * tricks.length)];
             
-            if (currentTrick === "BACKFLIP") chassisBody.angularVelocity.x = -10;
-            if (currentTrick === "FRONTFLIP") chassisBody.angularVelocity.x = 10;
-            if (currentTrick === "360 SPIN") chassisBody.angularVelocity.y = 10;
-            if (currentTrick === "SUPERMAN") chassisBody.angularVelocity.x = 3;
+            if (gameState.trick === "BACKFLIP") gameState.rotX = -0.15;
+            if (gameState.trick === "FRONTFLIP") gameState.rotX = 0.15;
+            if (gameState.trick === "360 SPIN") gameState.rotY = 0.15;
             
             const trickUI = document.getElementById('trick-text');
-            trickUI.innerText = currentTrick + "!";
+            trickUI.innerText = gameState.trick + "!";
             trickUI.style.display = 'block';
             
-            score += 500;
-            trickCooldown = 2;
+            gameState.score += 500;
+            gameState.trickTimer = 1.5;
         }
     });
 
@@ -341,47 +273,104 @@
         requestAnimationFrame(animate);
         const dt = Math.min(clock.getDelta(), 0.1);
 
-        if (isPlaying) {
-            world.step(1 / 60, dt, 3);
+        if (isPlaying && activeBike) {
             
-            if (trickCooldown > 0) trickCooldown -= dt;
-            if (trickCooldown <= 0) document.getElementById('trick-text').style.display = 'none';
+            // 1. Разгон и торможение
+            if (keys.gas) gameState.speed += 15 * dt;
+            else if (keys.brake) gameState.speed -= 30 * dt;
+            else gameState.speed -= 5 * dt;
+            
+            gameState.speed = Math.max(0, Math.min(gameState.maxSpeed, gameState.speed));
+            
+            // 2. Повороты
+            if (keys.left) gameState.x -= 20 * dt;
+            if (keys.right) gameState.x += 20 * dt;
 
-            isInAir = !vehicle.wheelInfos[0].isInContact && !vehicle.wheelInfos[1].isInContact;
-
-            const force = 800;
-            vehicle.applyEngineForce(keys.gas ? -force : 0, 1);
-            vehicle.applyEngineForce(keys.gas ? -force : 0, 0);
-            vehicle.setBrake(keys.brake ? 200 : 0, 0);
-            vehicle.setBrake(keys.brake ? 200 : 0, 1);
-            vehicle.setSteeringValue(keys.left ? 0.5 : keys.right ? -0.5 : 0, 0);
-
-            if (keys.wheelie && !isInAir) {
-                chassisBody.torque.x += 50; 
-            }
-
-            document.getElementById('score-text').innerText = "Очки: " + score;
-            const speed = Math.abs(chassisBody.velocity.z) * 3.6;
-            document.getElementById('speed-text').innerText = "Скорость: " + Math.round(speed) + " км/ч";
-
-            if (activeBike) {
-                activeBike.position.copy(chassisBody.position);
-                activeBike.quaternion.copy(chassisBody.quaternion);
-
-                if (isFPV) {
-                    const fpvOffset = new THREE.Vector3(0, 0.8, 0.2).applyQuaternion(chassisBody.quaternion);
-                    camera.position.copy(chassisBody.position).add(fpvOffset);
-                    const lookAtPos = new THREE.Vector3(0, 0.8, -10).applyQuaternion(chassisBody.quaternion).add(chassisBody.position);
-                    camera.lookAt(lookAtPos);
-                } else {
-                    const camOffset = new THREE.Vector3(0, 3, -8).applyQuaternion(chassisBody.quaternion);
-                    camera.position.lerp(chassisBody.position.clone().add(camOffset), 0.1);
-                    const lookAtPos = chassisBody.position.clone();
-                    lookAtPos.y += 1;
-                    camera.lookAt(lookAtPos);
+            // 3. Движение
+            gameState.z -= gameState.speed * dt;
+            const targetY = getGroundHeight(gameState.z);
+            
+            // 4. Прыжки и падение
+            if (gameState.y > targetY + 0.5) {
+                gameState.isJumping = true;
+                gameState.velY -= 30 * dt; 
+                gameState.y += gameState.velY * dt;
+            } else {
+                if (gameState.isJumping) {
+                    // ПРИЗЕМЛЕНИЕ! Даем сильный импульс подвеске (сжатие)
+                    gameState.suspension = -1.5; 
+                    gameState.suspensionVel = 0;
+                    gameState.isJumping = false;
+                    gameState.velY = 0;
+                    gameState.rotX = 0; 
+                    gameState.rotY = 0;
+                    document.getElementById('trick-text').style.display = 'none';
+                }
+                gameState.y = targetY;
+                
+                // Имитация случайных кочек (визуальный импульс)
+                if (gameState.speed > 15 && Math.random() < 0.1) {
+                    gameState.suspension = -0.5; 
                 }
             }
+
+            // 5. Вилли
+            if (keys.wheelie && !gameState.isJumping) {
+                gameState.rotX = -0.3;
+            } else if (!gameState.isJumping && gameState.rotX === -0.3) {
+                gameState.rotX = 0;
+            }
+
+            // 6. Трюки
+            if (gameState.isJumping && gameState.trickTimer > 0) {
+                gameState.trickTimer -= dt;
+                activeBike.rotation.x += gameState.rotX;
+                activeBike.rotation.y += gameState.rotY;
+            }
+
+            // ===== 7. ВИЗУАЛЬНАЯ ПОДВЕСКА (SPRING PHYSICS) =====
+            // Это заставляет модель пружинить. 
+            // Сила, тянущая пружину в исходное состояние (0)
+            const springStrength = 80; 
+            const damping = 12; // Гашение колебаний
+            
+            gameState.suspensionVel += -springStrength * gameState.suspension * dt;
+            gameState.suspensionVel *= Math.exp(-damping * dt);
+            gameState.suspension += gameState.suspensionVel * dt;
+
+            // Применяем пружину к позиции (Y) и наклону модели
+            // Если suspension < 0, велик проседает и наклоняется вперед
+            let visualY = gameState.y + (gameState.suspension * 0.5);
+            
+            activeBike.position.set(gameState.x, visualY, gameState.z);
+            
+            // Наклон в поворотах
+            if (!gameState.isJumping && !keys.wheelie) {
+                if (keys.left) activeBike.rotation.z = 0.2;
+                else if (keys.right) activeBike.rotation.z = -0.2;
+                else activeBike.rotation.z = 0;
+                
+                // Наклон по склону + эффект подвески (нос опускается при сжатии)
+                activeBike.rotation.x = (-Math.sin(gameState.z * 0.05) * 0.2) + (gameState.suspension * 0.3); 
+            }
+
+            // ===== 8. КАМЕРА =====
+            // Камера тоже слегка трясется при сжатии подвески
+            let camShake = gameState.suspension * 0.2;
+
+            if (isFPV) {
+                camera.position.set(gameState.x, visualY + 2 + camShake, gameState.z + 1);
+                camera.lookAt(gameState.x, visualY + 2, gameState.z - 10);
+            } else {
+                camera.position.set(gameState.x, visualY + 5 + camShake, gameState.z + 10);
+                camera.lookAt(activeBike.position);
+            }
+
+            // UI
+            document.getElementById('score-text').innerText = "Очки: " + gameState.score;
+            document.getElementById('speed-text').innerText = "Скорость: " + Math.round(gameState.speed * 3.6) + " км/ч";
         }
+
         renderer.render(scene, camera);
     }
     animate();
