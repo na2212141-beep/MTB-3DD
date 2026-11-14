@@ -114,12 +114,11 @@
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     
-    // Отключаем Antialias для мобилок, чтобы ускорить рендер
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
     
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.BasicShadowMap; // Самые быстрые тени
+    renderer.shadowMap.type = THREE.BasicShadowMap;
     wrapper.appendChild(renderer.domElement);
     window.addEventListener('resize', resizeScreen);
     resizeScreen();
@@ -129,7 +128,6 @@
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
     dirLight.position.set(50, 100, 50);
     dirLight.castShadow = true;
-    // Уменьшаем разрешение теней для скорости
     dirLight.shadow.mapSize.width = 1024;
     dirLight.shadow.mapSize.height = 1024;
     scene.add(dirLight);
@@ -230,18 +228,15 @@
     let bikesLoaded = { enduro: null, mongoose: null };
     let selectedBike = 'enduro';
 
-    // ===== ОПТИМИЗАЦИЯ ЗАГРУЗКИ =====
-    // 1. Сначала грузим ТОЛЬКО Enduro (он выбран по умолчанию)
-    loader.load('enduro_bicycle_dh.glb', (gltf) => {
+    // ===== ТУТ ТЕ САМЫЕ ПРЯМЫЕ ССЫЛКИ НА GITHUB =====
+    loader.load('https://na2212141-beep.github.io/MTB-3DD/enduro_bicycle_dh.glb', (gltf) => {
         bikesLoaded.enduro = gltf.scene;
         bikesLoaded.enduro.traverse(n => { if(n.isMesh) n.castShadow = true; });
         
-        // Как только загрузился первый велик - сразу разрешаем играть!
         document.getElementById('play-btn').disabled = false;
         document.getElementById('play-btn').innerText = "ПОЕХАЛИ!";
         
-        // 2. Второй велик (Mongoose) грузим в фоне, пока игрок в меню или уже играет
-        loader.load('mtb_mongoose_tyax.glb', (gltf2) => {
+        loader.load('https://na2212141-beep.github.io/MTB-3DD/mtb_mongoose_tyax.glb', (gltf2) => {
             bikesLoaded.mongoose = gltf2.scene;
             bikesLoaded.mongoose.traverse(n => { if(n.isMesh) n.castShadow = true; });
         });
@@ -270,7 +265,7 @@
         
         generateTrack(currentTrack);
         
-        activeBike = bikesLoaded[selectedBike] || bikesLoaded['enduro']; // Если второй не успел скачаться, даем первый
+        activeBike = bikesLoaded[selectedBike] || bikesLoaded['enduro'];
         activeBike.visible = !isFPV;
         scene.add(activeBike);
         
