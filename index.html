@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>body { margin: 0; overflow: hidden; background-color: #87CEEB; touch-action: none; }</style>
+    <!-- Подключаем 3D-движок -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- Подключаем сервер (Socket.IO) -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+<script>
+    // ===== 1. ПОДКЛЮЧЕНИЕ К СЕРВЕРУ =====
+    // Твой старый сервер отлично подойдет для 3D игры!
+    const socket = io('https://mtb-server.onrender.com', { transports: ['websocket'] });
+    
+    socket.on('connect', () => {
+        console.log('✅ Подключено к серверу!');
+    });
+
+    // ===== 2. 3D СЦЕНА =====
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Небо
+    scene.fog = new THREE.Fog(0x87CEEB, 10, 50); // Туман на горизонте
+
+    // Камера
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 3, 7); 
+
+    // Рендерер
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    // ===== 3. СВЕТ =====
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Основной свет
+    scene.add(ambientLight);
+    
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); // Солнце (тени)
+    dirLight.position.set(10, 20, 10);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // ===== 4. ЗЕМЛЯ =====
+    const groundGeo = new THREE.PlaneGeometry(1000, 1000);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x5a3d1f });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // ===== 5. ЗАГРУЗКА ТВОЕЙ МОДЕЛИ =====
+    let bikeModel = null;
+    const loader = new THREE.GLTFLoader();
+    
+    loader.load('bike.glb', function (gltf) {
+        bikeModel = gltf.scene;
+        
+        // Включаем тени для модели
+        bikeModel.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+        bikeModel.position.y = 1; // Чуть поднимаем над землей
+        scene.add(bikeModel);
+        console.log("✅ Велик загружен!");
+        
+    }, undefined, function (error) {
+        console.error("❌ Ошибка загрузки велика:", error);
+        alert("Не удалось загрузить bike.glb. Проверь, лежит ли он в той же папке.");
+    });
+
+    // ===== 6. АНИМАЦИЯ И УПРАВЛЕНИЕ =====
+    let speed = 0; // Скорость движения
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Если велик загрузился, двигаем его вперед
+        if (bikeModel) {
+            speed += 0.001; // Постепенно ускоряемся
+            bikeModel.position.z -= speed; // Едем по оси Z
+            camera.position.z -= speed;    // Камера летит следом
+        }
+
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // Чтобы при повороте телефона ничего не ломалось
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+</body>
+</html>
