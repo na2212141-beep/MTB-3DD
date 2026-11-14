@@ -22,12 +22,13 @@
         #hud { position: absolute; top: 20px; left: 20px; color: white; z-index: 50; text-shadow: 2px 2px 4px #000; display: none; }
         #hud h2 { font-size: 22px; color: #fc0; }
         #hud p { font-size: 16px; margin: 5px 0; }
-        #trick-text { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 35px; font-weight: bold; color: #e0e; text-shadow: 0 0 10px #e0e; z-index: 60; display: none; text-align: center; font-style: italic; }
+        #trick-text { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); font-size: 35px; font-weight: bold; color: #e0e; text-shadow: 0 0 10px #e0e; z-index: 60; display: none; text-align: center; font-style: italic; }
         
-        #controls { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 100; pointer-events: none; }
-        .btn-group { display: flex; gap: 10px; pointer-events: auto; align-items: flex-end; }
+        /* ИСПРАВЛЕНИЕ КНОПОК (Теперь они в линию внизу) */
+        #controls { position: absolute; bottom: 15px; width: 100%; display: flex; flex-direction: row; justify-content: space-between; padding: 0 15px; z-index: 100; pointer-events: none; }
+        .btn-group { display: flex; flex-direction: row; gap: 15px; pointer-events: auto; align-items: flex-end; }
         
-        .btn { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; user-select: none; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.1s; }
+        .btn { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; user-select: none; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.1s; }
         .btn:active { transform: scale(0.85); }
         
         .btn-arrow { background: rgba(50, 100, 200, 0.6); border: 3px solid #8cf; color: #fff; font-size: 32px; }
@@ -36,7 +37,7 @@
         .btn-wheelie { background: rgba(255, 165, 0, 0.8); border: 3px solid #ff8c00; font-size: 12px; font-weight: bold; }
         .btn-trick { background: rgba(160, 32, 240, 0.8); border: 3px solid #e0e; font-size: 12px; font-weight: bold; }
         
-        .btn svg { width: 40px; height: 40px; fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .btn svg { width: 35px; height: 35px; fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
         #cam-toggle { position: absolute; top: 15px; right: 15px; z-index: 100; padding: 8px 15px; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;}
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -47,7 +48,7 @@
 <div id="game-wrapper">
     <div id="menu">
         <h1>MTB FREERIDE 3D</h1>
-        <p>Визуальная подвеска включена!</p>
+        <p>Вид от первого лица с рулём!</p>
         
         <div class="selector-group" id="track-select">
             <div class="sel-btn active" data-track="forest">Лес</div>
@@ -112,13 +113,14 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: true }); // Включил сглаживание для красоты
     wrapper.appendChild(renderer.domElement);
     window.addEventListener('resize', resizeScreen);
     resizeScreen();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    // Улучшенный свет
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(50, 100, 50);
     scene.add(dirLight);
 
@@ -127,8 +129,7 @@
         z: 0, x: 0, y: 0, speed: 0, maxSpeed: 35, velY: 0,
         rotX: 0, rotY: 0, rotZ: 0, isJumping: false,
         trick: "", trickTimer: 0, score: 0,
-        suspension: 0, // Параметр для визуальной подвески
-        suspensionVel: 0
+        suspension: 0, suspensionVel: 0
     };
 
     let currentTrack = 'forest';
@@ -162,9 +163,73 @@
         const groundMat = new THREE.MeshStandardMaterial({ color: colors.ground, flatShading: true });
         groundMesh = new THREE.Mesh(groundGeo, groundMat);
         groundMesh.rotation.x = -Math.PI / 2;
+        groundMesh.receiveShadow = true;
         scene.add(groundMesh);
     }
 
+    // ===== 3D РУЛЬ И РУКИ (Для вида от первого лица) =====
+    const cockpitGroup = new THREE.Group();
+    
+    // Материалы
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 });
+    const handMat = new THREE.MeshStandardMaterial({ color: 0xe8b48a }); // Цвет кожи
+    const gripMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+
+    // Труба руля
+    const barGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.2, 8);
+    const bar = new THREE.Mesh(barGeo, metalMat);
+    bar.rotation.z = Math.PI / 2;
+    cockpitGroup.add(bar);
+
+    // Вынос руля (палка по центру)
+    const stemGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.5, 8);
+    const stem = new THREE.Mesh(stemGeo, metalMat);
+    stem.position.set(0, -0.1, 0.2);
+    stem.rotation.x = Math.PI / 2;
+    cockpitGroup.add(stem);
+
+    // Грипсы (резина на концах)
+    const gripGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.25, 8);
+    const gripL = new THREE.Mesh(gripGeo, gripMat);
+    gripL.rotation.z = Math.PI / 2;
+    gripL.position.set(-0.45, 0, 0);
+    cockpitGroup.add(gripL);
+    
+    const gripR = new THREE.Mesh(gripGeo, gripMat);
+    gripR.rotation.z = Math.PI / 2;
+    gripR.position.set(0.45, 0, 0);
+    cockpitGroup.add(gripR);
+
+    // Руки (кубики, имитирующие кулаки на грипсах)
+    const handGeo = new THREE.BoxGeometry(0.12, 0.12, 0.15);
+    
+    const handL = new THREE.Mesh(handGeo, handMat);
+    handL.position.set(-0.45, 0.05, 0.05);
+    cockpitGroup.add(handL);
+    
+    const handR = new THREE.Mesh(handGeo, handMat);
+    handR.position.set(0.45, 0.05, 0.05);
+    cockpitGroup.add(handR);
+
+    // Руки (предплечья, уходящие вниз к камере)
+    const armGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.6, 8);
+    
+    const armL = new THREE.Mesh(armGeo, handMat);
+    armL.position.set(-0.4, -0.2, 0.3);
+    armL.rotation.x = Math.PI / 4;
+    armL.rotation.z = -0.2;
+    cockpitGroup.add(armL);
+    
+    const armR = new THREE.Mesh(armGeo, handMat);
+    armR.position.set(0.4, -0.2, 0.3);
+    armR.rotation.x = Math.PI / 4;
+    armR.rotation.z = 0.2;
+    cockpitGroup.add(armR);
+
+    cockpitGroup.visible = false; // Скрываем пока не начнется игра
+    scene.add(cockpitGroup);
+
+    // ===== ЗАГРУЗКА МОДЕЛЕЙ =====
     let activeBike = null;
     let isPlaying = false;
     let isFPV = true;
@@ -211,8 +276,17 @@
         activeBike.visible = !isFPV;
         scene.add(activeBike);
         
-        gameState.z = 0; gameState.x = 0; gameState.y = getGroundHeight(0);
-        gameState.speed = 0; gameState.velY = 0; gameState.suspension = 0;
+        // ИСПРАВЛЕНИЕ СПАВНА: Ставим ровно на землю
+        gameState.z = 0; 
+        gameState.x = 0; 
+        gameState.y = getGroundHeight(0) + 0.5; // +0.5 чтобы колеса были на земле, а не в ней
+        
+        gameState.speed = 0; 
+        gameState.velY = 0; 
+        gameState.suspension = 0;
+        
+        // Показываем руль в FPS режиме
+        cockpitGroup.visible = isFPV;
         
         isPlaying = true;
     };
@@ -221,6 +295,7 @@
         isFPV = !isFPV;
         document.getElementById('cam-toggle').innerText = isFPV ? "Вид: FPS" : "Вид: 3-е лицо";
         if (activeBike) activeBike.visible = !isFPV; 
+        cockpitGroup.visible = isFPV && isPlaying;
     };
 
     const keys = { gas: false, brake: false, left: false, right: false, wheelie: false };
@@ -275,29 +350,27 @@
 
         if (isPlaying && activeBike) {
             
-            // 1. Разгон и торможение
+            // Разгон и торможение
             if (keys.gas) gameState.speed += 15 * dt;
             else if (keys.brake) gameState.speed -= 30 * dt;
             else gameState.speed -= 5 * dt;
-            
             gameState.speed = Math.max(0, Math.min(gameState.maxSpeed, gameState.speed));
             
-            // 2. Повороты
+            // Повороты
             if (keys.left) gameState.x -= 20 * dt;
             if (keys.right) gameState.x += 20 * dt;
 
-            // 3. Движение
+            // Движение
             gameState.z -= gameState.speed * dt;
             const targetY = getGroundHeight(gameState.z);
             
-            // 4. Прыжки и падение
+            // Прыжки
             if (gameState.y > targetY + 0.5) {
                 gameState.isJumping = true;
                 gameState.velY -= 30 * dt; 
                 gameState.y += gameState.velY * dt;
             } else {
                 if (gameState.isJumping) {
-                    // ПРИЗЕМЛЕНИЕ! Даем сильный импульс подвеске (сжатие)
                     gameState.suspension = -1.5; 
                     gameState.suspensionVel = 0;
                     gameState.isJumping = false;
@@ -306,63 +379,67 @@
                     gameState.rotY = 0;
                     document.getElementById('trick-text').style.display = 'none';
                 }
-                gameState.y = targetY;
+                gameState.y = targetY + 0.5; // Держим на уровне земли
                 
-                // Имитация случайных кочек (визуальный импульс)
                 if (gameState.speed > 15 && Math.random() < 0.1) {
                     gameState.suspension = -0.5; 
                 }
             }
 
-            // 5. Вилли
+            // Вилли
             if (keys.wheelie && !gameState.isJumping) {
                 gameState.rotX = -0.3;
             } else if (!gameState.isJumping && gameState.rotX === -0.3) {
                 gameState.rotX = 0;
             }
 
-            // 6. Трюки
+            // Трюки
             if (gameState.isJumping && gameState.trickTimer > 0) {
                 gameState.trickTimer -= dt;
                 activeBike.rotation.x += gameState.rotX;
                 activeBike.rotation.y += gameState.rotY;
             }
 
-            // ===== 7. ВИЗУАЛЬНАЯ ПОДВЕСКА (SPRING PHYSICS) =====
-            // Это заставляет модель пружинить. 
-            // Сила, тянущая пружину в исходное состояние (0)
+            // Визуальная подвеска
             const springStrength = 80; 
-            const damping = 12; // Гашение колебаний
-            
+            const damping = 12; 
             gameState.suspensionVel += -springStrength * gameState.suspension * dt;
             gameState.suspensionVel *= Math.exp(-damping * dt);
             gameState.suspension += gameState.suspensionVel * dt;
 
-            // Применяем пружину к позиции (Y) и наклону модели
-            // Если suspension < 0, велик проседает и наклоняется вперед
+            // Позиция велика (3-е лицо)
             let visualY = gameState.y + (gameState.suspension * 0.5);
-            
             activeBike.position.set(gameState.x, visualY, gameState.z);
             
-            // Наклон в поворотах
             if (!gameState.isJumping && !keys.wheelie) {
                 if (keys.left) activeBike.rotation.z = 0.2;
                 else if (keys.right) activeBike.rotation.z = -0.2;
                 else activeBike.rotation.z = 0;
-                
-                // Наклон по склону + эффект подвески (нос опускается при сжатии)
                 activeBike.rotation.x = (-Math.sin(gameState.z * 0.05) * 0.2) + (gameState.suspension * 0.3); 
             }
 
-            // ===== 8. КАМЕРА =====
-            // Камера тоже слегка трясется при сжатии подвески
+            // ===== КАМЕРА =====
             let camShake = gameState.suspension * 0.2;
 
             if (isFPV) {
-                camera.position.set(gameState.x, visualY + 2 + camShake, gameState.z + 1);
-                camera.lookAt(gameState.x, visualY + 2, gameState.z - 10);
+                // Камера от первого лица
+                camera.position.set(gameState.x, visualY + 1.2 + camShake, gameState.z);
+                
+                // Слегка опускаем взгляд вниз на трассу
+                camera.lookAt(gameState.x, visualY + 0.5, gameState.z - 10);
+
+                // Синхронизация руля с камерой
+                cockpitGroup.position.set(gameState.x, visualY + 0.8 + camShake, gameState.z - 0.5);
+                cockpitGroup.rotation.copy(camera.rotation);
+                
+                // Руль крутится при поворотах
+                if (keys.left) cockpitGroup.rotation.z = 0.2; // Наклон руля
+                else if (keys.right) cockpitGroup.rotation.z = -0.2;
+                else cockpitGroup.rotation.z = 0;
+
             } else {
-                camera.position.set(gameState.x, visualY + 5 + camShake, gameState.z + 10);
+                // Камера от 3-го лица
+                camera.position.set(gameState.x, visualY + 4 + camShake, gameState.z + 8);
                 camera.lookAt(activeBike.position);
             }
 
