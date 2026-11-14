@@ -3,383 +3,86 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #111; touch-action: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        #game-wrapper { position: absolute; top: 0; left: 0; transform-origin: top left; width: 100%; height: 100%; }
-        
-        #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a2a3a, #0a0a15); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; }
-        #menu h1 { font-size: 50px; color: #fc0; margin-bottom: 5px; text-shadow: 0 4px 10px rgba(252, 200, 0, 0.5); font-style: italic; letter-spacing: 2px; }
-        #menu p { color: #8cf; margin-bottom: 30px; font-size: 18px; letter-spacing: 1px; }
-        
-        .selector-group { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .sel-btn { padding: 12px 25px; background: #333; border: 2px solid #555; border-radius: 10px; color: #ccc; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
-        .sel-btn.active { background: #2a7; border-color: #0f0; color: #fff; box-shadow: 0 0 15px rgba(0, 255, 0, 0.6); transform: scale(1.05); }
-        
-        #play-btn { padding: 20px 70px; background: linear-gradient(to right, #2a7, #1d5); border: none; border-radius: 50px; color: white; font-size: 28px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 20px rgba(42, 167, 100, 0.4); margin-top: 20px; transition: 0.2s; }
-        #play-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
-        
-        #hud { position: absolute; top: 20px; left: 20px; color: white; z-index: 50; text-shadow: 2px 2px 4px #000; display: none; }
-        #hud h2 { font-size: 24px; color: #fc0; }
-        #hud p { font-size: 18px; margin: 5px 0; }
-        #trick-text { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 40px; font-weight: bold; color: #e0e; text-shadow: 0 0 10px #e0e; z-index: 60; display: none; text-align: center; font-style: italic; }
-        
-        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 100; pointer-events: none; }
-        .btn-group { display: flex; gap: 15px; pointer-events: auto; align-items: flex-end; }
-        
-        .btn { width: 75px; height: 75px; border-radius: 50%; display: flex; justify-content: center; align-items: center; user-select: none; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.1s; }
-        .btn:active { transform: scale(0.85); }
-        
-        .btn-arrow { background: rgba(50, 100, 200, 0.6); border: 3px solid #8cf; color: #fff; font-size: 35px; }
-        .btn-gas { background: rgba(40, 167, 69, 0.8); border: 3px solid #4f4; }
-        .btn-brake { background: rgba(220, 53, 69, 0.8); border: 3px solid #f44; }
-        .btn-wheelie { background: rgba(255, 165, 0, 0.8); border: 3px solid #ff8c00; font-size: 14px; font-weight: bold; }
-        .btn-trick { background: rgba(160, 32, 240, 0.8); border: 3px solid #e0e; font-size: 14px; font-weight: bold; }
-        
-        .btn svg { width: 45px; height: 45px; fill: none; stroke: white; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-        #cam-toggle { position: absolute; top: 20px; right: 20px; z-index: 100; padding: 10px 20px; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { margin: 0; overflow: hidden; background-color: #222; color: white; font-family: sans-serif; }
+        #debug { position: absolute; top: 10px; left: 10px; font-size: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; z-index: 9999; width: 90%; pointer-events: none; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
 </head>
 <body>
 
-<div id="game-wrapper">
-    <div id="menu">
-        <h1>MTB FREERIDE 3D</h1>
-        <p>Выбери трассу и велик</p>
-        
-        <div class="selector-group" id="track-select">
-            <div class="sel-btn active" data-track="forest">Лес</div>
-            <div class="sel-btn" data-track="desert">Пустыня</div>
-            <div class="sel-btn" data-track="snow">Снег</div>
-        </div>
-
-        <div class="selector-group" id="bike-select">
-            <div class="sel-btn active" data-bike="enduro">Enduro DH</div>
-            <div class="sel-btn" data-bike="mongoose">Mongoose</div>
-        </div>
-
-        <button id="play-btn" disabled>ЗАГРУЗКА...</button>
-    </div>
-
-    <div id="hud">
-        <h2 id="score-text">Очки: 0</h2>
-        <p id="speed-text">Скорость: 0 км/ч</p>
-    </div>
-    <div id="trick-text">BACKFLIP!</div>
-
-    <div id="cam-toggle">Вид: FPS</div>
-
-    <div id="controls">
-        <div class="btn-group">
-            <div class="btn btn-arrow" id="btnLeft">←</div>
-            <div class="btn btn-arrow" id="btnRight">→</div>
-        </div>
-        <div class="btn-group">
-            <div class="btn btn-wheelie" id="btnWheelie">ВИЛЛИ</div>
-            <div class="btn btn-trick" id="btnTrick">ТРЮК</div>
-            <div class="btn btn-brake" id="btnBrake">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
-            </div>
-            <div class="btn btn-gas" id="btnGas">
-                <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path><circle cx="12" cy="12" r="4"></circle></svg>
-            </div>
-        </div>
-    </div>
-</div>
+<div id="debug">Запуск...</div>
 
 <script>
-    const wrapper = document.getElementById('game-wrapper');
-    function resizeScreen() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        if (h > w) {
-            wrapper.style.width = h + 'px';
-            wrapper.style.height = w + 'px';
-            wrapper.style.transform = `rotate(90deg) translateY(-100%)`;
-        } else {
-            wrapper.style.width = w + 'px';
-            wrapper.style.height = h + 'px';
-            wrapper.style.transform = 'none';
-        }
-        if (camera) {
-            camera.aspect = (h > w ? w : w) / (h > w ? h : h);
-            camera.updateProjectionMatrix();
-            renderer.setSize(h > w ? h : w, h > w ? w : h);
-        }
-    }
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const dbg = document.getElementById('debug');
     
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
-    
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.BasicShadowMap;
-    wrapper.appendChild(renderer.domElement);
-    window.addEventListener('resize', resizeScreen);
-    resizeScreen();
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(50, 100, 50);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    scene.add(dirLight);
-
-    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0) });
-    const groundMaterial = new CANNON.Material("ground");
-    const wheelMaterial = new CANNON.Material("wheel");
-    world.addContactMaterial(new CANNON.ContactMaterial(wheelMaterial, groundMaterial, { friction: 0.5, restitution: 0 }));
-
-    let currentTrack = 'forest';
-    const trackColors = {
-        forest: { ground: 0x2e8b57, sky: 0x87CEEB, fog: 0x87CEEB },
-        desert: { ground: 0xd2b48c, sky: 0xffd700, fog: 0xffd700 },
-        snow:   { ground: 0xeeeeee, sky: 0xaaaaaa, fog: 0xaaaaaa }
+    // Ловим любые ошибки
+    window.onerror = function(msg, url, line) {
+        dbg.innerHTML = "❌ ОШИБКА КОДА:<br>" + msg + "<br>Строка: " + line;
+        dbg.style.background = "red";
     };
 
-    let groundMesh, heightfieldBody;
+    try {
+        dbg.innerHTML = "1. Создаем 3D сцену...";
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
 
-    function generateTrack(type) {
-        if (groundMesh) scene.remove(groundMesh);
-        if (heightfieldBody) world.removeBody(heightfieldBody);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 10);
 
-        const colors = trackColors[type];
-        scene.background = new THREE.Color(colors.sky);
-        scene.fog = new THREE.Fog(colors.fog, 50, 300);
-
-        const groundGeo = new THREE.PlaneGeometry(200, 600, 50, 100);
-        const vertices = groundGeo.attributes.position.array;
-        const matrix = [];
+        const renderer = new THREE.WebGLRenderer({ antialias: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
         
-        for (let i = 0; i < 100; i++) {
-            matrix.push([]);
-            for (let j = 0; j < 50; j++) {
-                const x = (i / 100) * 200 - 100;
-                const z = (j / 50) * 600 - 300;
-                let height = 0;
-                if (type === 'forest') height = Math.sin(x * 0.1) * 2 + Math.cos(z * 0.05) * 3;
-                if (type === 'desert') height = Math.sin(x * 0.05) * 4 + Math.cos(z * 0.02) * 5;
-                if (type === 'snow') height = Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.1) * 2;
-                matrix[i].push(height);
-            }
-        }
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-        for (let i = 0; i < vertices.length; i += 3) {
-            const x = vertices[i];
-            const z = vertices[i + 1];
-            let height = 0;
-            if (type === 'forest') height = Math.sin(x * 0.1) * 2 + Math.cos(z * 0.05) * 3;
-            if (type === 'desert') height = Math.sin(x * 0.05) * 4 + Math.cos(z * 0.02) * 5;
-            if (type === 'snow') height = Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.1) * 2;
-            vertices[i + 2] = height;
-        }
-        groundGeo.computeVertexNormals();
+        // Простой пол (чтобы видеть, куда падает)
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshBasicMaterial({color: 0x5a3d1f}));
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
 
-        const groundMat = new THREE.MeshStandardMaterial({ color: colors.ground, flatShading: true });
-        groundMesh = new THREE.Mesh(groundGeo, groundMat);
-        groundMesh.rotation.x = -Math.PI / 2;
-        groundMesh.receiveShadow = true;
-        scene.add(groundMesh);
+        dbg.innerHTML = "2. Начинаем скачивать велик...";
 
-        const heightfieldShape = new CANNON.Heightfield(matrix, { elementSize: 200 / 100 });
-        heightfieldBody = new CANNON.Body({ mass: 0, material: groundMaterial });
-        heightfieldBody.addShape(heightfieldShape);
-        heightfieldBody.position.set(-100, 0, -300);
-        heightfieldBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-        world.addBody(heightfieldBody);
-    }
-
-    const chassisShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 1));
-    const chassisBody = new CANNON.Body({ mass: 80, material: wheelMaterial });
-    chassisBody.addShape(chassisShape);
-    chassisBody.position.set(0, 5, 0); 
-    chassisBody.angularDamping = 0.9;
-
-    const vehicle = new CANNON.RaycastVehicle({
-        chassisBody: chassisBody,
-        indexRightAxis: 0, indexUpAxis: 1, indexForwardAxis: 2
-    });
-
-    const wheelOptions = {
-        radius: 0.4, directionLocal: new CANNON.Vec3(0, -1, 0),
-        suspensionStiffness: 30, suspensionRestLength: 0.3, frictionSlip: 1.4,
-        dampingRelaxation: 2.3, dampingCompression: 4.4, maxSuspensionForce: 100000,
-        rollInfluence: 0.05, axleLocal: new CANNON.Vec3(-1, 0, 0),
-        chassisConnectionPointLocal: new CANNON.Vec3(1, 1, 0), maxSuspensionTravel: 0.3,
-    };
-    wheelOptions.chassisConnectionPointLocal.set(0, 0, 1.2); vehicle.addWheel(wheelOptions);
-    wheelOptions.chassisConnectionPointLocal.set(0, 0, -1.2); vehicle.addWheel(wheelOptions);
-    vehicle.addToWorld(world);
-
-    let activeBike = null;
-    let isPlaying = false;
-    let isFPV = true;
-    let score = 0;
-    let currentTrick = "";
-    
-    const loader = new THREE.GLTFLoader();
-    let bikesLoaded = { enduro: null, mongoose: null };
-    let selectedBike = 'enduro';
-
-    // ===== ТУТ ТЕ САМЫЕ ПРЯМЫЕ ССЫЛКИ НА GITHUB =====
-    loader.load('https://na2212141-beep.github.io/MTB-3DD/enduro_bicycle_dh.glb', (gltf) => {
-        bikesLoaded.enduro = gltf.scene;
-        bikesLoaded.enduro.traverse(n => { if(n.isMesh) n.castShadow = true; });
+        const loader = new THREE.GLTFLoader();
         
-        document.getElementById('play-btn').disabled = false;
-        document.getElementById('play-btn').innerText = "ПОЕХАЛИ!";
-        
-        loader.load('https://na2212141-beep.github.io/MTB-3DD/mtb_mongoose_tyax.glb', (gltf2) => {
-            bikesLoaded.mongoose = gltf2.scene;
-            bikesLoaded.mongoose.traverse(n => { if(n.isMesh) n.castShadow = true; });
-        });
-    });
+        // Скачиваем велик по прямой ссылке
+        loader.load('https://na2212141-beep.github.io/MTB-3DD/enduro_bicycle_dh.glb', 
+            function (gltf) {
+                dbg.innerHTML = "3. Велик успешно скачан!<br>Встраиваем в игру...";
+                
+                const bike = gltf.scene;
+                // Если велик маленький, вот тут его размер:
+                bike.scale.set(2, 2, 2); 
+                scene.add(bike);
 
-    function setupMenu(containerId, callback) {
-        const container = document.getElementById(containerId);
-        const buttons = container.querySelectorAll('.sel-btn');
-        
-        buttons.forEach(btn => {
-            btn.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                callback(btn.dataset);
-            });
-        });
-    }
-
-    setupMenu('track-select', (data) => { currentTrack = data.track; });
-    setupMenu('bike-select', (data) => { selectedBike = data.bike; });
-
-    document.getElementById('play-btn').onclick = () => {
-        document.getElementById('menu').style.display = 'none';
-        document.getElementById('hud').style.display = 'block';
-        
-        generateTrack(currentTrack);
-        
-        activeBike = bikesLoaded[selectedBike] || bikesLoaded['enduro'];
-        activeBike.visible = !isFPV;
-        scene.add(activeBike);
-        
-        chassisBody.position.set(0, 5, 0);
-        chassisBody.velocity.set(0,0,0);
-        chassisBody.angularVelocity.set(0,0,0);
-        
-        isPlaying = true;
-    };
-
-    document.getElementById('cam-toggle').onclick = () => {
-        isFPV = !isFPV;
-        document.getElementById('cam-toggle').innerText = isFPV ? "Вид: FPS" : "Вид: 3-е лицо";
-        if (activeBike) activeBike.visible = !isFPV; 
-    };
-
-    const keys = { gas: false, brake: false, left: false, right: false, wheelie: false };
-    function bindBtn(id, key) {
-        const el = document.getElementById(id);
-        el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
-        el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-        el.addEventListener('mousedown', () => keys[key] = true);
-        el.addEventListener('mouseup', () => keys[key] = false);
-    }
-    bindBtn('btnGas', 'gas'); bindBtn('btnBrake', 'brake'); bindBtn('btnLeft', 'left'); bindBtn('btnRight', 'right'); bindBtn('btnWheelie', 'wheelie');
-
-    let isInAir = false;
-    let trickCooldown = 0;
-    
-    document.getElementById('btnTrick').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if (isInAir && trickCooldown <= 0) {
-            const tricks = ["BACKFLIP", "FRONTFLIP", "360 SPIN", "SUPERMAN"];
-            currentTrick = tricks[Math.floor(Math.random() * tricks.length)];
-            
-            if (currentTrick === "BACKFLIP") chassisBody.angularVelocity.x = -10;
-            if (currentTrick === "FRONTFLIP") chassisBody.angularVelocity.x = 10;
-            if (currentTrick === "360 SPIN") chassisBody.angularVelocity.y = 10;
-            if (currentTrick === "SUPERMAN") chassisBody.angularVelocity.x = 3;
-            
-            const trickUI = document.getElementById('trick-text');
-            trickUI.innerText = currentTrick + "!";
-            trickUI.style.display = 'block';
-            
-            score += 500;
-            trickCooldown = 2;
-        }
-    });
-
-    window.addEventListener('keydown', e => {
-        if(e.code === 'ArrowUp' || e.code === 'KeyW') keys.gas = true;
-        if(e.code === 'ArrowDown' || e.code === 'KeyS') keys.brake = true;
-        if(e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
-        if(e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
-        if(e.code === 'Space') keys.wheelie = true;
-    });
-    window.addEventListener('keyup', e => {
-        if(e.code === 'ArrowUp' || e.code === 'KeyW') keys.gas = false;
-        if(e.code === 'ArrowDown' || e.code === 'KeyS') keys.brake = false;
-        if(e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
-        if(e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
-        if(e.code === 'Space') keys.wheelie = false;
-    });
-
-    const clock = new THREE.Clock();
-
-    function animate() {
-        requestAnimationFrame(animate);
-        const dt = Math.min(clock.getDelta(), 0.1);
-
-        if (isPlaying) {
-            world.step(1 / 60, dt, 3);
-            
-            if (trickCooldown > 0) trickCooldown -= dt;
-            if (trickCooldown <= 0) document.getElementById('trick-text').style.display = 'none';
-
-            isInAir = !vehicle.wheelInfos[0].isInContact && !vehicle.wheelInfos[1].isInContact;
-
-            const force = 800;
-            vehicle.applyEngineForce(keys.gas ? -force : 0, 1);
-            vehicle.applyEngineForce(keys.gas ? -force : 0, 0);
-            vehicle.setBrake(keys.brake ? 200 : 0, 0);
-            vehicle.setBrake(keys.brake ? 200 : 0, 1);
-            vehicle.setSteeringValue(keys.left ? 0.5 : keys.right ? -0.5 : 0, 0);
-
-            if (keys.wheelie && !isInAir) {
-                chassisBody.torque.x += 50; 
-            }
-
-            document.getElementById('score-text').innerText = "Очки: " + score;
-            const speed = Math.abs(chassisBody.velocity.z) * 3.6;
-            document.getElementById('speed-text').innerText = "Скорость: " + Math.round(speed) + " км/ч";
-
-            if (activeBike) {
-                activeBike.position.copy(chassisBody.position);
-                activeBike.quaternion.copy(chassisBody.quaternion);
-
-                if (isFPV) {
-                    const fpvOffset = new THREE.Vector3(0, 0.8, 0.2).applyQuaternion(chassisBody.quaternion);
-                    camera.position.copy(chassisBody.position).add(fpvOffset);
-                    const lookAtPos = new THREE.Vector3(0, 0.8, -10).applyQuaternion(chassisBody.quaternion).add(chassisBody.position);
-                    camera.lookAt(lookAtPos);
+                dbg.innerHTML = "✅ ВСЁ РАБОТАЕТ!";
+                setTimeout(() => { dbg.style.display = 'none'; }, 2000); // Прячем текст через 2 сек
+            }, 
+            function (xhr) {
+                // Показываем прогресс загрузки
+                if (xhr.total > 0) {
+                    let p = Math.round((xhr.loaded / xhr.total) * 100);
+                    dbg.innerHTML = "2. Скачиваем велик: " + p + "%";
                 } else {
-                    const camOffset = new THREE.Vector3(0, 3, -8).applyQuaternion(chassisBody.quaternion);
-                    camera.position.lerp(chassisBody.position.clone().add(camOffset), 0.1);
-                    const lookAtPos = chassisBody.position.clone();
-                    lookAtPos.y += 1;
-                    camera.lookAt(lookAtPos);
+                    dbg.innerHTML = "2. Скачиваем велик... (размер неизвестен)";
                 }
+            }, 
+            function (error) {
+                dbg.innerHTML = "❌ ОШИБКА ЗАГРУЗКИ ФАЙЛА!<br>Файл не найден по ссылке.";
+                dbg.style.background = "red";
             }
+        );
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
         }
-        renderer.render(scene, camera);
+        animate();
+
+    } catch (e) {
+        dbg.innerHTML = "❌ КРИТИЧЕСКАЯ ОШИБКА:<br>" + e.message;
+        dbg.style.background = "red";
     }
-    animate();
 </script>
 </body>
 </html>
