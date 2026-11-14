@@ -8,26 +8,22 @@
         
         #game-wrapper { position: absolute; top: 0; left: 0; transform-origin: top left; width: 100%; height: 100%; }
         
-        /* КРАСИВОЕ МЕНЮ */
         #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a2a3a, #0a0a15); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; }
         #menu h1 { font-size: 50px; color: #fc0; margin-bottom: 5px; text-shadow: 0 4px 10px rgba(252, 200, 0, 0.5); font-style: italic; letter-spacing: 2px; }
         #menu p { color: #8cf; margin-bottom: 30px; font-size: 18px; letter-spacing: 1px; }
         
-        .selector-group { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .sel-btn { padding: 12px 25px; background: #222; border: 2px solid #444; border-radius: 10px; color: #aaa; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .sel-btn.active { background: #357; border-color: #8cf; color: white; box-shadow: 0 0 15px rgba(136, 204, 255, 0.4); transform: scale(1.05); }
+        .selector-group { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .sel-btn { padding: 12px 25px; background: #333; border: 2px solid #555; border-radius: 10px; color: #ccc; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
+        .sel-btn.active { background: #2a7; border-color: #0f0; color: #fff; box-shadow: 0 0 15px rgba(0, 255, 0, 0.6); transform: scale(1.05); }
         
         #play-btn { padding: 20px 70px; background: linear-gradient(to right, #2a7, #1d5); border: none; border-radius: 50px; color: white; font-size: 28px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 20px rgba(42, 167, 100, 0.4); margin-top: 20px; transition: 0.2s; }
-        #play-btn:active { transform: scale(0.95); }
         #play-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
         
-        /* HUD (Интерфейс в игре) */
         #hud { position: absolute; top: 20px; left: 20px; color: white; z-index: 50; text-shadow: 2px 2px 4px #000; display: none; }
         #hud h2 { font-size: 24px; color: #fc0; }
         #hud p { font-size: 18px; margin: 5px 0; }
         #trick-text { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 40px; font-weight: bold; color: #e0e; text-shadow: 0 0 10px #e0e; z-index: 60; display: none; text-align: center; font-style: italic; }
         
-        /* КНОПКИ УПРАВЛЕНИЯ */
         #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 100; pointer-events: none; }
         .btn-group { display: flex; gap: 15px; pointer-events: auto; align-items: flex-end; }
         
@@ -50,10 +46,9 @@
 <body>
 
 <div id="game-wrapper">
-    <!-- МЕНЮ -->
     <div id="menu">
         <h1>MTB FREERIDE 3D</h1>
-        <p>Выбери трассу и покажи класс!</p>
+        <p>Выбери трассу и велик</p>
         
         <div class="selector-group" id="track-select">
             <div class="sel-btn active" data-track="forest">Лес</div>
@@ -69,7 +64,6 @@
         <button id="play-btn" disabled>ЗАГРУЗКА...</button>
     </div>
 
-    <!-- ИНТЕРФЕЙС В ИГРЕ -->
     <div id="hud">
         <h2 id="score-text">Очки: 0</h2>
         <p id="speed-text">Скорость: 0 км/ч</p>
@@ -78,7 +72,6 @@
 
     <div id="cam-toggle">Вид: FPS</div>
 
-    <!-- КНОПКИ -->
     <div id="controls">
         <div class="btn-group">
             <div class="btn btn-arrow" id="btnLeft">←</div>
@@ -98,7 +91,6 @@
 </div>
 
 <script>
-    // ===== 1. АДАПТАЦИЯ ЭКРАНА =====
     const wrapper = document.getElementById('game-wrapper');
     function resizeScreen() {
         const w = window.innerWidth;
@@ -119,11 +111,15 @@
         }
     }
 
-    // ===== 2. 3D СЦЕНА =====
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    
+    // Отключаем Antialias для мобилок, чтобы ускорить рендер
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
+    
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.BasicShadowMap; // Самые быстрые тени
     wrapper.appendChild(renderer.domElement);
     window.addEventListener('resize', resizeScreen);
     resizeScreen();
@@ -133,19 +129,17 @@
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
     dirLight.position.set(50, 100, 50);
     dirLight.castShadow = true;
+    // Уменьшаем разрешение теней для скорости
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
     scene.add(dirLight);
 
-    // ===== 3. ФИЗИКА =====
     const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0) });
     const groundMaterial = new CANNON.Material("ground");
     const wheelMaterial = new CANNON.Material("wheel");
     world.addContactMaterial(new CANNON.ContactMaterial(wheelMaterial, groundMaterial, { friction: 0.5, restitution: 0 }));
 
-    // ===== 4. ГЕНЕРАЦИЯ ТРАСС =====
     let currentTrack = 'forest';
-    let trackColor = 0x2e8b57;
-    let skyColor = 0x87CEEB;
-    
     const trackColors = {
         forest: { ground: 0x2e8b57, sky: 0x87CEEB, fog: 0x87CEEB },
         desert: { ground: 0xd2b48c, sky: 0xffd700, fog: 0xffd700 },
@@ -155,7 +149,6 @@
     let groundMesh, heightfieldBody;
 
     function generateTrack(type) {
-        // Удаляем старую трассу, если есть
         if (groundMesh) scene.remove(groundMesh);
         if (heightfieldBody) world.removeBody(heightfieldBody);
 
@@ -163,7 +156,6 @@
         scene.background = new THREE.Color(colors.sky);
         scene.fog = new THREE.Fog(colors.fog, 50, 300);
 
-        // Генерация высот
         const groundGeo = new THREE.PlaneGeometry(200, 600, 50, 100);
         const vertices = groundGeo.attributes.position.array;
         const matrix = [];
@@ -173,26 +165,21 @@
             for (let j = 0; j < 50; j++) {
                 const x = (i / 100) * 200 - 100;
                 const z = (j / 50) * 600 - 300;
-                
                 let height = 0;
                 if (type === 'forest') height = Math.sin(x * 0.1) * 2 + Math.cos(z * 0.05) * 3;
                 if (type === 'desert') height = Math.sin(x * 0.05) * 4 + Math.cos(z * 0.02) * 5;
                 if (type === 'snow') height = Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.1) * 2;
-                
                 matrix[i].push(height);
             }
         }
 
-        // Применяем высоты к визуальной сетке
         for (let i = 0; i < vertices.length; i += 3) {
             const x = vertices[i];
             const z = vertices[i + 1];
-            
             let height = 0;
             if (type === 'forest') height = Math.sin(x * 0.1) * 2 + Math.cos(z * 0.05) * 3;
             if (type === 'desert') height = Math.sin(x * 0.05) * 4 + Math.cos(z * 0.02) * 5;
             if (type === 'snow') height = Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.1) * 2;
-
             vertices[i + 2] = height;
         }
         groundGeo.computeVertexNormals();
@@ -203,7 +190,6 @@
         groundMesh.receiveShadow = true;
         scene.add(groundMesh);
 
-        // Физика земли
         const heightfieldShape = new CANNON.Heightfield(matrix, { elementSize: 200 / 100 });
         heightfieldBody = new CANNON.Body({ mass: 0, material: groundMaterial });
         heightfieldBody.addShape(heightfieldShape);
@@ -212,7 +198,6 @@
         world.addBody(heightfieldBody);
     }
 
-    // ===== 5. ВЕЛИК И УПРАВЛЕНИЕ =====
     const chassisShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 1));
     const chassisBody = new CANNON.Body({ mass: 80, material: wheelMaterial });
     chassisBody.addShape(chassisShape);
@@ -241,57 +226,54 @@
     let score = 0;
     let currentTrick = "";
     
-    // Загрузка моделей
     const loader = new THREE.GLTFLoader();
     let bikesLoaded = { enduro: null, mongoose: null };
     let selectedBike = 'enduro';
 
+    // ===== ОПТИМИЗАЦИЯ ЗАГРУЗКИ =====
+    // 1. Сначала грузим ТОЛЬКО Enduro (он выбран по умолчанию)
     loader.load('enduro_bicycle_dh.glb', (gltf) => {
         bikesLoaded.enduro = gltf.scene;
         bikesLoaded.enduro.traverse(n => { if(n.isMesh) n.castShadow = true; });
-        checkReady();
-    });
-    loader.load('mtb_mongoose_tyax.glb', (gltf) => {
-        bikesLoaded.mongoose = gltf.scene;
-        bikesLoaded.mongoose.traverse(n => { if(n.isMesh) n.castShadow = true; });
-        checkReady();
+        
+        // Как только загрузился первый велик - сразу разрешаем играть!
+        document.getElementById('play-btn').disabled = false;
+        document.getElementById('play-btn').innerText = "ПОЕХАЛИ!";
+        
+        // 2. Второй велик (Mongoose) грузим в фоне, пока игрок в меню или уже играет
+        loader.load('mtb_mongoose_tyax.glb', (gltf2) => {
+            bikesLoaded.mongoose = gltf2.scene;
+            bikesLoaded.mongoose.traverse(n => { if(n.isMesh) n.castShadow = true; });
+        });
     });
 
-    function checkReady() {
-        if (bikesLoaded.enduro && bikesLoaded.mongoose) {
-            document.getElementById('play-btn').disabled = false;
-            document.getElementById('play-btn').innerText = "ПОЕХАЛИ!";
-        }
+    function setupMenu(containerId, callback) {
+        const container = document.getElementById(containerId);
+        const buttons = container.querySelectorAll('.sel-btn');
+        
+        buttons.forEach(btn => {
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                callback(btn.dataset);
+            });
+        });
     }
 
-    // Выбор в меню
-    document.querySelectorAll('#track-select .sel-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('#track-select .sel-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentTrack = btn.dataset.track;
-        };
-    });
-    document.querySelectorAll('#bike-select .sel-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('#bike-select .sel-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            selectedBike = btn.dataset.bike;
-        };
-    });
+    setupMenu('track-select', (data) => { currentTrack = data.track; });
+    setupMenu('bike-select', (data) => { selectedBike = data.bike; });
 
-    // Старт игры
     document.getElementById('play-btn').onclick = () => {
         document.getElementById('menu').style.display = 'none';
         document.getElementById('hud').style.display = 'block';
         
         generateTrack(currentTrack);
         
-        activeBike = bikesLoaded[selectedBike];
+        activeBike = bikesLoaded[selectedBike] || bikesLoaded['enduro']; // Если второй не успел скачаться, даем первый
         activeBike.visible = !isFPV;
         scene.add(activeBike);
         
-        // Сброс позиции
         chassisBody.position.set(0, 5, 0);
         chassisBody.velocity.set(0,0,0);
         chassisBody.angularVelocity.set(0,0,0);
@@ -305,7 +287,6 @@
         if (activeBike) activeBike.visible = !isFPV; 
     };
 
-    // Кнопки управления
     const keys = { gas: false, brake: false, left: false, right: false, wheelie: false };
     function bindBtn(id, key) {
         const el = document.getElementById(id);
@@ -316,7 +297,6 @@
     }
     bindBtn('btnGas', 'gas'); bindBtn('btnBrake', 'brake'); bindBtn('btnLeft', 'left'); bindBtn('btnRight', 'right'); bindBtn('btnWheelie', 'wheelie');
 
-    // Трюки
     let isInAir = false;
     let trickCooldown = 0;
     
@@ -326,22 +306,20 @@
             const tricks = ["BACKFLIP", "FRONTFLIP", "360 SPIN", "SUPERMAN"];
             currentTrick = tricks[Math.floor(Math.random() * tricks.length)];
             
-            // Применяем физику вращения в зависимости от трюка
             if (currentTrick === "BACKFLIP") chassisBody.angularVelocity.x = -10;
             if (currentTrick === "FRONTFLIP") chassisBody.angularVelocity.x = 10;
             if (currentTrick === "360 SPIN") chassisBody.angularVelocity.y = 10;
-            if (currentTrick === "SUPERMAN") chassisBody.angularVelocity.x = 3; // Легкий наклон
+            if (currentTrick === "SUPERMAN") chassisBody.angularVelocity.x = 3;
             
             const trickUI = document.getElementById('trick-text');
             trickUI.innerText = currentTrick + "!";
             trickUI.style.display = 'block';
             
             score += 500;
-            trickCooldown = 2; // Секунды до следующего трюка
+            trickCooldown = 2;
         }
     });
 
-    // Клавиатура
     window.addEventListener('keydown', e => {
         if(e.code === 'ArrowUp' || e.code === 'KeyW') keys.gas = true;
         if(e.code === 'ArrowDown' || e.code === 'KeyS') keys.brake = true;
@@ -357,7 +335,6 @@
         if(e.code === 'Space') keys.wheelie = false;
     });
 
-    // ===== 6. ИГРОВОЙ ЦИКЛ =====
     const clock = new THREE.Clock();
 
     function animate() {
@@ -370,10 +347,8 @@
             if (trickCooldown > 0) trickCooldown -= dt;
             if (trickCooldown <= 0) document.getElementById('trick-text').style.display = 'none';
 
-            // Проверка на землю (для трюков)
             isInAir = !vehicle.wheelInfos[0].isInContact && !vehicle.wheelInfos[1].isInContact;
 
-            // Управление
             const force = 800;
             vehicle.applyEngineForce(keys.gas ? -force : 0, 1);
             vehicle.applyEngineForce(keys.gas ? -force : 0, 0);
@@ -381,18 +356,14 @@
             vehicle.setBrake(keys.brake ? 200 : 0, 1);
             vehicle.setSteeringValue(keys.left ? 0.5 : keys.right ? -0.5 : 0, 0);
 
-            // ВИЛЛИ (поднятие переднего колеса)
             if (keys.wheelie && !isInAir) {
-                // Прикладываем крутящий момент к задней оси, чтобы поднять перед
                 chassisBody.torque.x += 50; 
             }
 
-            // Обновляем HUD
             document.getElementById('score-text').innerText = "Очки: " + score;
-            const speed = Math.abs(chassisBody.velocity.z) * 3.6; // Примерно в км/ч
+            const speed = Math.abs(chassisBody.velocity.z) * 3.6;
             document.getElementById('speed-text').innerText = "Скорость: " + Math.round(speed) + " км/ч";
 
-            // Синхронизация модели
             if (activeBike) {
                 activeBike.position.copy(chassisBody.position);
                 activeBike.quaternion.copy(chassisBody.quaternion);
